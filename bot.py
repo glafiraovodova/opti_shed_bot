@@ -15,7 +15,7 @@ TOKEN = '8345579740:AAG2ksPseh6P1PeDjF__YsmmY0XE7628gfI'
 # Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        'Привет! Я тестовый бот. Используй /help для списка команд.'
+        'Привет! Я бот Оптимальное расписание. Мои авторы Оводова Глафира и Гаджиева Мадина. Используй /help для списка команд.'
     )
 
 # Обработчик команды /help
@@ -25,8 +25,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 /start — начать работу
 /help — показать эту справку
 /echo <текст> — повторить ваш текст
+/schedule - добавление параметров расписания 
     """
     await update.message.reply_text(help_text)
+
+# Обработчик команды /help
+async def schedule_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    reply_text = """
+В процессе разработки
+    """
+    await update.message.reply_text(reply_text)
 
 # Обработчик команды /echo
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -52,6 +60,7 @@ def main() -> None:
     # Регистрация обработчиков
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("schedule", schedule_command))
     application.add_handler(CommandHandler("echo", echo))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_error_handler(error)
@@ -62,3 +71,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
