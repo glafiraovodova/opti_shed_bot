@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Токен вашего бота (получите у @BotFather)
-TOKEN = 'YOUR_TOKEN_HERE'
+TOKEN = '8345579740:AAG2ksPseh6P1PeDjF__YsmmY0XE7628gfI'
 
 # Обработчик команды /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
