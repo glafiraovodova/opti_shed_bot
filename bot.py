@@ -1,4 +1,5 @@
 import logging
+from decouple import config
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 
@@ -10,7 +11,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Токен вашего бота
-TOKEN = '8345579740:AAG2ksPseh6P1PeDjF__YsmmY0XE7628gfI'
+TOKEN = config('API_TOKEN')
 
 # Состояния для ConversationHandler
 INPUT_CLASSES, INPUT_SUBJECTS = range(2)
@@ -261,3 +262,4 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
+
