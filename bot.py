@@ -676,6 +676,20 @@ def main() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("Действие отменено.")
+    return ConversationHandler.END
+
+# Обработчик текстовых сообщений (не команд)
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user_text = update.message.text
+    await update.message.reply_text(f'Вы сказали: {user_text}')
+
+# Обработчик ошибок
+async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error(f'Update {update} caused error {context.error}')
+
     # Регистрация обработчиков
     application.add_handler(conv_handler_new)
     application.add_handler(conv_handler_difficult)
