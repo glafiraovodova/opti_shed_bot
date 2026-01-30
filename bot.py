@@ -65,7 +65,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 /view_schedule — посмотреть список предметов по классам
 /view_timetable — посмотреть расписание по дням недели
 /clear_schedule — очистить расписание
-/echo <текст> — повторить ваш текст
 
 ⚙️ Сложность предметов:
 • Сложные предметы (математика, физика) ставятся в начало дня
@@ -616,8 +615,43 @@ async def generate_timetable_summary(update: Update, context: ContextTypes.DEFAU
     
     await update.message.reply_text(summary_text)
 
-# Остальные функции остаются без изменений (start, help_command, cancel, view_schedule, clear_schedule, echo, handle_message, error)
+# Остальные функции остаются без изменений (start, help_command, cancel, view_schedule, clear_schedule, handle_message, error)
 # ... (копируем остальные функции без изменений)
+
+# Просмотр текущего расписания (список предметов)
+async def view_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if 'schedule' not in context.user_data or not context.user_data['schedule']:
+        await update.message.reply_text("📭 У вас нет сохраненного расписания.\nИспользуйте /new_schedule для создания.")
+        return
+    
+    schedule = context.user_data['schedule']
+    classes = context.user_data.get('classes', list(schedule.keys()))
+    
+    response = "📋 Текущее расписание (предметы по классам):\n\n"
+    
+    for cls in classes:
+        if cls in schedule:
+            subjects = schedule[cls]
+            total_hours = sum(subj['hours_per_week'] for subj in subjects)
+            
+            response += f"🎓 Класс {cls}:\n"
+            for i, subj in enumerate(subjects, 1):
+                response += f"  {i}. {subj['name']}: {subj['hours_per_week']} ч/нед\n"
+            response += f"  📊 Всего часов в неделю: {total_hours}\n\n"
+    
+    response += f"Всего классов: {len(classes)}\n"
+    response += "Используйте /view_timetable для просмотра расписания по дням"
+    
+    await update.message.reply_text(response)
+
+# Очистка расписания
+async def clear_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if 'schedule' in context.user_data:
+        del context.user_data['schedule']
+    if 'classes' in context.user_data:
+        del context.user_data['classes']
+    
+    await update.message.reply_text("✅ Расписание очищено.")
 
 def main() -> None:
     """Запуск бота."""
@@ -651,7 +685,6 @@ def main() -> None:
     application.add_handler(CommandHandler("view_schedule", view_schedule))
     application.add_handler(CommandHandler("view_timetable", view_timetable))
     application.add_handler(CommandHandler("clear_schedule", clear_schedule))
-    application.add_handler(CommandHandler("echo", echo))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_error_handler(error)
 
