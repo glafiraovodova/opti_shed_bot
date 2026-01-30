@@ -1,5 +1,5 @@
+import os
 import logging
-from decouple import config
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
 import random
@@ -12,7 +12,12 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Токен вашего бота
-TOKEN = config('API_TOKEN')
+
+try:
+    # Access the value using the key (variable name)
+    TOKEN = os.environ['API_TOKEN']
+except KeyError:
+    print("API_TOKEN environment variable not set.")
 
 # Состояния для ConversationHandler
 INPUT_CLASSES, INPUT_SUBJECTS = range(2)
