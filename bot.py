@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
@@ -13,9 +14,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Токен вашего бота
+# Токен нашего бота
 try:
-    TOKEN = os.environ['API_TOKEN']
+    load_dotenv()
+    TOKEN = os.getenv("API_TOKEN")
 except KeyError:
     print("API_TOKEN environment variable not set.")
     exit(1)
@@ -676,6 +678,9 @@ def main() -> None:
         fallbacks=[CommandHandler('cancel', cancel)],
     )
 
+    # Запуск бота
+    print("🤖 Бот запущен...")
+    application.run_polling()
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("Действие отменено.")
@@ -709,3 +714,4 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 if __name__ == '__main__':
     main()
+
