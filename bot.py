@@ -54,26 +54,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         '/show_difficult - показать текущие настройки сложности'
     )
 
-# Обработчик команды /help
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    help_text = """
-📋 Доступные команды:
-
-/start — начать работу
-/help — показать эту справку
-/new_schedule — создать новое расписание
-/set_difficult — задать список сложных предметов
-/show_difficult — показать текущие настройки сложности
-/view_schedule — посмотреть список предметов по классам
-/view_timetable — посмотреть расписание по дням недели
-/clear_schedule — очистить расписание
-
-⚙️ Сложность предметов:
-• Сложные предметы (математика, физика) ставятся в начало дня
-• Средние предметы (история, биология) ставятся в середину
-• Легкие предметы (труд, музыка) ставятся в конец дня
-"""
-    await update.message.reply_text(help_text)
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    await update.message.reply_text("Действие отменено.")
+    return ConversationHandler.END
 
 # Команда для задания сложных предметов
 async def set_difficult(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -617,10 +600,6 @@ async def generate_timetable_summary(update: Update, context: ContextTypes.DEFAU
     
     await update.message.reply_text(summary_text)
 
-# Остальные функции остаются без изменений (start, help_command, cancel, view_schedule, clear_schedule, handle_message, error)
-# ... (копируем остальные функции без изменений)
-
-# Просмотр текущего расписания (список предметов)
 async def view_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if 'schedule' not in context.user_data or not context.user_data['schedule']:
         await update.message.reply_text("📭 У вас нет сохраненного расписания.\nИспользуйте /new_schedule для создания.")
@@ -655,36 +634,24 @@ async def clear_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     
     await update.message.reply_text("✅ Расписание очищено.")
 
-def main() -> None:
-    """Запуск бота."""
-    application = Application.builder().token(TOKEN).build()
+# ConversationHandler для создания расписания
+conv_handler_new = ConversationHandler(
+    entry_points=[CommandHandler('new_schedule', new_schedule)],
+    states={
+        INPUT_CLASSES: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_classes)],
+        INPUT_SUBJECTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_subjects)],
+    },
+    fallbacks=[CommandHandler('cancel', cancel)],
+)
 
-    # ConversationHandler для создания расписания
-    conv_handler_new = ConversationHandler(
-        entry_points=[CommandHandler('new_schedule', new_schedule)],
-        states={
-            INPUT_CLASSES: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_classes)],
-            INPUT_SUBJECTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_subjects)],
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
+# ConversationHandler для настройки сложности
+conv_handler_difficult = ConversationHandler(
+    entry_points=[CommandHandler('set_difficult', set_difficult)],
+    states={
+        INPUT_DIFFICULT_SUBJECTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_difficult_subjects)],
+    },
+    fallbacks=[CommandHandler('cancel', cancel)],
     )
-    
-    # ConversationHandler для настройки сложности
-    conv_handler_difficult = ConversationHandler(
-        entry_points=[CommandHandler('set_difficult', set_difficult)],
-        states={
-            INPUT_DIFFICULT_SUBJECTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, input_difficult_subjects)],
-        },
-        fallbacks=[CommandHandler('cancel', cancel)],
-    )
-
-    # Запуск бота
-    print("🤖 Бот запущен...")
-    application.run_polling()
-
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text("Действие отменено.")
-    return ConversationHandler.END
 
 # Обработчик текстовых сообщений (не команд)
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -694,6 +661,30 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 # Обработчик ошибок
 async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f'Update {update} caused error {context.error}')
+
+# Обработчик команды /help
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    help_text = """
+📋 Доступные команды:
+
+/start — начать работу
+/help — показать эту справку
+/new_schedule — создать новое расписание
+/set_difficult — задать список сложных предметов
+/show_difficult — показать текущие настройки сложности
+/view_schedule — посмотреть список предметов по классам
+/view_timetable — посмотреть расписание по дням недели
+/clear_schedule — очистить расписание
+
+⚙️ Сложность предметов:
+• Сложные предметы (математика, физика) ставятся в начало дня
+• Средние предметы (история, биология) ставятся в середину
+• Легкие предметы (труд, музыка) ставятся в конец дня
+"""
+    await update.message.reply_text(help_text)
+
+def main() -> None:
+    application = Application.builder().token(TOKEN).build()
 
     # Регистрация обработчиков
     application.add_handler(conv_handler_new)
@@ -709,7 +700,6 @@ async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Запуск бота
     print("🤖 Бот запущен...")
-    print("⚙️ Режим сложности предметов активирован!")
     application.run_polling()
 
 if __name__ == '__main__':
