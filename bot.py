@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 # Токен нашего бота
 try:
-    TOKEN = '8345579740:AAG2ksPseh6P1PeDjF__YsmmY0XE7628gfI'
+    TOKEN = os.getenv("API_TOKEN")
 except KeyError:
     print("API_TOKEN environment variable not set.")
     exit(1)
@@ -702,4 +702,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-
